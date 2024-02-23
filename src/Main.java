@@ -1,4 +1,7 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -19,6 +22,10 @@ public class Main {
 	Long baseGajiManager = (long) 8000000; 
 	Long baseGajiSupervisor = (long) 6000000; 
 	Long baseGajiAdmin = (long) 4000000; 
+	
+	Long bonusManager = (long) (baseGajiManager * 0.1);
+	Long bonusSupervisor = (long) (baseGajiSupervisor * 0.075);
+	Long bonusAdmin = (long) (baseGajiAdmin * 0.05);
 	
 	public Main() {
 		while(true) {
@@ -52,7 +59,6 @@ public class Main {
 		String jabatan;
 		String kode = GenerateKode();
 		Long gaji = (long) 0;
-//		Long bonus = (long) 0;
 		
 		do {
 			System.out.print("Input nama karyawan [>= 3]: ");
@@ -80,6 +86,14 @@ public class Main {
 		listKaryawan.add(new Karyawan(kode, nama, kelamin, jabatan, gaji));
 		
 		System.out.println("Berhasil menambahkan karyawan dengan id: " + kode);
+		BonusGaji(jabatan);
+		
+		Collections.sort(listKaryawan, new Comparator<Karyawan>() {
+			public int compare(Karyawan k1, Karyawan k2) {
+				return String.valueOf(k1.nama).compareTo(k2.nama);
+			}
+		});
+		
 		System.out.println("ENTER to return");
 		scan.nextLine();
 		
@@ -140,7 +154,23 @@ public class Main {
 			listKaryawan.get(index).jabatan = jabatan;
 		}
 		
+		if(jabatan.equals("Manager")) {
+			listKaryawan.get(index).gaji = baseGajiManager;
+		} else if(jabatan.equals("Supervisor")) {
+			listKaryawan.get(index).gaji = baseGajiSupervisor;
+		} else if(jabatan.equals("Admin")) {
+			listKaryawan.get(index).gaji = baseGajiAdmin;
+		}
+
 		System.out.println("Berhasil mengupdate karyawan dengan id " + getKode);
+		BonusGaji(jabatan);
+		
+		Collections.sort(listKaryawan, new Comparator<Karyawan>() {
+			public int compare(Karyawan k1, Karyawan k2) {
+				return String.valueOf(k1.nama).compareTo(k2.nama);
+			}
+		});
+		
 		System.out.println("ENTER to return");
 		scan.nextLine();
 
@@ -171,23 +201,82 @@ public class Main {
 		scan.nextLine();
 	}
 	
-//	public void BonusGaji(String jabatan) {
-//		if(jabatan.equals("Manager")) {
-//			ArrayList<String> listManager = new ArrayList<String>();
-//			Long bonus = baseGajiManager * (10 / 100);
-//			
-//			for(int i = 0; i < listKaryawan.size(); i++) {
-//				if(listKaryawan.get(i).jabatan.equals("Manager")) {
-//					countManager++;
-//					listManager.add(listKaryawan.get(i).jabatan);
-//				}
-//			}
-//			
-//			if(((countManager - 1) % 3 == 0) && ((countManager - 1) != 0)) {
-//				listKaryawan.get(0).gaji += bonus;
-//			}
-//		}
-//	}
+	public void BonusGaji(String jabatan) {
+	    if(jabatan.equals("Manager")) {
+	        ArrayList<String> karyawanKodeList = new ArrayList<String>();
+
+	        for(int i = 0; i < listKaryawan.size(); i++) {
+	            if(listKaryawan.get(i).jabatan.equals("Manager") && !listKaryawan.get(i).hasReceivedBonus) {
+	                karyawanKodeList.add(listKaryawan.get(i).kode);
+	            }
+	        }
+
+	        if((karyawanKodeList.size() - 1) % 3 == 0 && karyawanKodeList.size() > 1) {
+	            karyawanKodeList.remove(karyawanKodeList.size() - 1);
+
+	            for(String kodeList : karyawanKodeList) {
+	                int index = ValidateKode(kodeList);
+	                if(index != -1 && listKaryawan.get(index).gaji != baseGajiManager + bonusManager) {
+	                    listKaryawan.get(index).gaji += bonusManager;
+	                    listKaryawan.get(index).hasReceivedBonus = true;
+	                }
+	            }
+	            PrintKode(jabatan, karyawanKodeList);
+	        }
+	    } else if(jabatan.equals("Supervisor")) {
+	        ArrayList<String> karyawanKodeList = new ArrayList<String>();
+
+	        for(int i = 0; i < listKaryawan.size(); i++) {
+	            if(listKaryawan.get(i).jabatan.equals("Supervisor") && !listKaryawan.get(i).hasReceivedBonus) {
+	                karyawanKodeList.add(listKaryawan.get(i).kode);
+	            }
+	        }
+
+	        if((karyawanKodeList.size() - 1) % 3 == 0 && karyawanKodeList.size() > 1) {
+	            karyawanKodeList.remove(karyawanKodeList.size() - 1);
+
+	            for(String kodeList : karyawanKodeList) {
+	                int index = ValidateKode(kodeList);
+	                if(index != -1 && listKaryawan.get(index).gaji != baseGajiSupervisor + bonusSupervisor) {
+	                    listKaryawan.get(index).gaji += bonusSupervisor;
+	                    listKaryawan.get(index).hasReceivedBonus = true;
+	                }
+	            }
+	            PrintKode(jabatan, karyawanKodeList);
+	        }
+	    } else if(jabatan.equals("Admin")) {
+	        ArrayList<String> karyawanKodeList = new ArrayList<String>();
+
+	        for(int i = 0; i < listKaryawan.size(); i++) {
+	            if(listKaryawan.get(i).jabatan.equals("Admin") && !listKaryawan.get(i).hasReceivedBonus) {
+	                karyawanKodeList.add(listKaryawan.get(i).kode);
+	            }
+	        }
+
+	        if((karyawanKodeList.size() - 1) % 3 == 0 && karyawanKodeList.size() > 1) {
+	            karyawanKodeList.remove(karyawanKodeList.size() - 1);
+
+	            for(String kodeList : karyawanKodeList) {
+	                int index = ValidateKode(kodeList);
+	                if(index != -1 && listKaryawan.get(index).gaji != baseGajiAdmin + bonusAdmin) {
+	                    listKaryawan.get(index).gaji += bonusAdmin;
+	                    listKaryawan.get(index).hasReceivedBonus = true;
+	                }
+	            }
+	            PrintKode(jabatan, karyawanKodeList);
+	        }
+	    }
+	}
+
+	public int ValidateKode(String kode) {
+	    HashMap<String, Integer> kodeToIndexMap = new HashMap<>();
+	    for (int i = 0; i < listKaryawan.size(); i++) {
+	        kodeToIndexMap.put(listKaryawan.get(i).kode, i);
+	    }
+
+	    Integer index = kodeToIndexMap.get(kode);
+	    return index != null ? index : -1;
+	}
 	
 	public void Display() {
 		System.out.println("|---|-----------------|------------------------------|--------------|-------------|-------------|");
@@ -197,6 +286,35 @@ public class Main {
 			System.out.printf("|%3s|%17s|%30s|%14s|%13s|%13s|\n", (i + 1), listKaryawan.get(i).kode, listKaryawan.get(i).nama, listKaryawan.get(i).kelamin, listKaryawan.get(i).jabatan, listKaryawan.get(i).gaji);
 		}
 		System.out.println("|---|-----------------|------------------------------|--------------|-------------|-------------|");
+	}
+	
+	public void PrintKode(String jabatan, ArrayList<String> kodeList) {
+		if(jabatan.equals("Manager")) {
+			System.out.print("Bonus sebesar 10% telah diberikan kepada karyawan dengan id ");
+			for(int i = 0; i < kodeList.size(); i++) {
+				System.out.print(kodeList.get(i));
+				if(i != kodeList.size() - 1) {
+					System.out.print(", ");
+				}
+			}
+		} else if(jabatan.equals("Supervisor")) {
+			System.out.print("Bonus sebesar 7.5% telah diberikan kepada karyawan dengan id ");
+			for(int i = 0; i < kodeList.size(); i++) {
+				System.out.print(kodeList.get(i));
+				if(i != kodeList.size() - 1) {
+					System.out.print(", ");
+				}
+			}
+		} else if(jabatan.equals("Admin")) {
+			System.out.print("Bonus sebesar 5% telah diberikan kepada karyawan dengan id ");
+			for(int i = 0; i < kodeList.size(); i++) {
+				System.out.print(kodeList.get(i));
+				if(i != kodeList.size() - 1) {
+					System.out.print(", ");
+				}
+			}
+		}
+		System.out.println("");
 	}
 	
 	public String GenerateKode() {

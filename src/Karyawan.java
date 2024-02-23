@@ -5,7 +5,9 @@ public class Karyawan {
     String kelamin;
     String jabatan;
     Long gaji;
-
+    
+    boolean hasReceivedBonus = false;
+    
     public Karyawan(String kode, String nama, String kelamin, String jabatan, Long gaji) {
         this.kode = kode;
         this.nama = nama;
